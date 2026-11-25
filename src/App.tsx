@@ -17,7 +17,7 @@ function AppContent() {
 
   return (
     <div
-      className={`min-h-screen flex flex-col font-sans transition-colors selection:bg-emerald-700 selection:text-white ${
+      className={`min-h-screen flex flex-col overflow-x-hidden font-sans transition-colors selection:bg-emerald-700 selection:text-white ${
         isDark ? 'bg-[#09090B] text-[#F4F4F5]' : 'bg-[#F8FAFC] text-slate-900'
       }`}
     >

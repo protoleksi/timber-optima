@@ -33,19 +33,19 @@ export const LogKpiCards: React.FC<LogKpiProps> = ({
   const textSub = isDark ? 'text-zinc-400' : 'text-slate-500';
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
       {/* 1. Recovery Rate */}
-      <div className={`border rounded-lg p-3.5 shadow-none flex flex-col justify-between transition-colors ${cardCls}`}>
-        <div className={`flex items-center justify-between text-xs ${textSub}`}>
-          <span>Выход пиломатериалов</span>
-          <Percent className="w-3.5 h-3.5 opacity-60" />
+      <div className={`border rounded-lg p-2.5 sm:p-3.5 shadow-none flex flex-col justify-between transition-colors ${cardCls}`}>
+        <div className={`flex items-center justify-between gap-1 text-[11px] sm:text-xs ${textSub}`}>
+          <span className="truncate">Выход пиломатериалов</span>
+          <Percent className="w-3.5 h-3.5 opacity-60 shrink-0" />
         </div>
-        <div className="my-1.5 flex items-baseline gap-2">
-          <span className={`text-2xl font-bold tabular-nums whitespace-nowrap ${textHead}`}>
+        <div className="my-1.5 flex flex-wrap items-baseline gap-1.5 sm:gap-2">
+          <span className={`text-xl sm:text-2xl font-bold tabular-nums whitespace-nowrap ${textHead}`}>
             {curYield.toFixed(1)}%
           </span>
           <span
-            className={`text-xs font-semibold px-1.5 py-0.5 rounded whitespace-nowrap border ${
+            className={`text-[11px] sm:text-xs font-semibold px-1.5 py-0.5 rounded whitespace-nowrap border ${
               deltaYieldPp >= 0
                 ? isDark
                   ? 'bg-emerald-950/60 text-emerald-400 border-emerald-800'
@@ -58,7 +58,7 @@ export const LogKpiCards: React.FC<LogKpiProps> = ({
             {deltaYieldPp >= 0 ? `+${deltaYieldPp.toFixed(1)}` : deltaYieldPp.toFixed(1)} п.п.
           </span>
         </div>
-        <div className={`text-[11px] flex justify-between tabular-nums ${textSub}`}>
+        <div className={`text-[10px] sm:text-[11px] flex justify-between gap-1 tabular-nums ${textSub}`}>
           <span>База ступени:</span>
           <span className={`font-medium whitespace-nowrap ${isDark ? 'text-zinc-300' : 'text-slate-700'}`}>
             {baseYield.toFixed(1)}%
@@ -67,17 +67,17 @@ export const LogKpiCards: React.FC<LogKpiProps> = ({
       </div>
 
       {/* 2. Revenue per Log */}
-      <div className={`border rounded-lg p-3.5 shadow-none flex flex-col justify-between transition-colors ${cardCls}`}>
-        <div className={`flex items-center justify-between text-xs ${textSub}`}>
-          <span>Выручка с бревна</span>
-          <Banknote className="w-3.5 h-3.5 opacity-60" />
+      <div className={`border rounded-lg p-2.5 sm:p-3.5 shadow-none flex flex-col justify-between transition-colors ${cardCls}`}>
+        <div className={`flex items-center justify-between gap-1 text-[11px] sm:text-xs ${textSub}`}>
+          <span className="truncate">Выручка с бревна</span>
+          <Banknote className="w-3.5 h-3.5 opacity-60 shrink-0" />
         </div>
-        <div className="my-1.5 flex items-baseline gap-2">
-          <span className={`text-2xl font-bold tabular-nums whitespace-nowrap ${textHead}`}>
+        <div className="my-1.5 flex flex-wrap items-baseline gap-1.5 sm:gap-2">
+          <span className={`text-xl sm:text-2xl font-bold tabular-nums whitespace-nowrap ${textHead}`}>
             {Math.round(curRev).toLocaleString('ru-RU')} ₽
           </span>
           <span
-            className={`text-xs font-semibold px-1.5 py-0.5 rounded whitespace-nowrap border ${
+            className={`text-[11px] sm:text-xs font-semibold px-1.5 py-0.5 rounded whitespace-nowrap border ${
               deltaRevRub >= 0
                 ? isDark
                   ? 'bg-emerald-950/60 text-emerald-400 border-emerald-800'
@@ -90,7 +90,7 @@ export const LogKpiCards: React.FC<LogKpiProps> = ({
             {deltaRevRub >= 0 ? `+${deltaRevPct.toFixed(1)}%` : `${deltaRevPct.toFixed(1)}%`}
           </span>
         </div>
-        <div className={`text-[11px] flex justify-between tabular-nums ${textSub}`}>
+        <div className={`text-[10px] sm:text-[11px] flex justify-between gap-1 tabular-nums ${textSub}`}>
           <span>Базовая выручка:</span>
           <span className={`font-medium whitespace-nowrap ${isDark ? 'text-zinc-300' : 'text-slate-700'}`}>
             {Math.round(baseRev).toLocaleString('ru-RU')} ₽
@@ -99,14 +99,14 @@ export const LogKpiCards: React.FC<LogKpiProps> = ({
       </div>
 
       {/* 3. Delta to Baseline */}
-      <div className={`border rounded-lg p-3.5 shadow-none flex flex-col justify-between transition-colors ${cardCls}`}>
-        <div className={`flex items-center justify-between text-xs ${textSub}`}>
-          <span>Прирост к базовому</span>
-          <TrendingUp className="w-3.5 h-3.5 opacity-60" />
+      <div className={`border rounded-lg p-2.5 sm:p-3.5 shadow-none flex flex-col justify-between transition-colors ${cardCls}`}>
+        <div className={`flex items-center justify-between gap-1 text-[11px] sm:text-xs ${textSub}`}>
+          <span className="truncate">Прирост к базовому</span>
+          <TrendingUp className="w-3.5 h-3.5 opacity-60 shrink-0" />
         </div>
         <div className="my-1.5 flex items-baseline gap-2">
           <span
-            className={`text-2xl font-bold tabular-nums whitespace-nowrap ${
+            className={`text-xl sm:text-2xl font-bold tabular-nums whitespace-nowrap ${
               isDark ? 'text-emerald-400' : 'text-emerald-700'
             }`}
           >
@@ -116,7 +116,7 @@ export const LogKpiCards: React.FC<LogKpiProps> = ({
             ₽
           </span>
         </div>
-        <div className={`text-[11px] flex justify-between tabular-nums ${textSub}`}>
+        <div className={`text-[10px] sm:text-[11px] flex justify-between gap-1 tabular-nums ${textSub}`}>
           <span>По объёму:</span>
           <span
             className={`font-medium whitespace-nowrap ${
@@ -129,18 +129,18 @@ export const LogKpiCards: React.FC<LogKpiProps> = ({
       </div>
 
       {/* 4. Log Raw Volume */}
-      <div className={`border rounded-lg p-3.5 shadow-none flex flex-col justify-between transition-colors ${cardCls}`}>
-        <div className={`flex items-center justify-between text-xs ${textSub}`}>
-          <span>Объём сырья</span>
-          <CircleDot className="w-3.5 h-3.5 opacity-60" />
+      <div className={`border rounded-lg p-2.5 sm:p-3.5 shadow-none flex flex-col justify-between transition-colors ${cardCls}`}>
+        <div className={`flex items-center justify-between gap-1 text-[11px] sm:text-xs ${textSub}`}>
+          <span className="truncate">Объём сырья</span>
+          <CircleDot className="w-3.5 h-3.5 opacity-60 shrink-0" />
         </div>
         <div className="my-1.5 flex items-baseline gap-2">
-          <span className={`text-2xl font-bold tabular-nums whitespace-nowrap ${textHead}`}>
+          <span className={`text-xl sm:text-2xl font-bold tabular-nums whitespace-nowrap ${textHead}`}>
             {bal.logVolume.toFixed(3)} м³
           </span>
         </div>
-        <div className={`text-[11px] flex justify-between tabular-nums ${textSub}`}>
-          <span>Пиломатериалы (ном.):</span>
+        <div className={`text-[10px] sm:text-[11px] flex justify-between gap-1 tabular-nums ${textSub}`}>
+          <span className="truncate">Пиломатериалы (ном.):</span>
           <span className={`font-medium whitespace-nowrap ${isDark ? 'text-zinc-300' : 'text-slate-700'}`}>
             {bal.nomBoardsVolume.toFixed(3)} м³
           </span>
@@ -228,12 +228,12 @@ export const LogBalanceAndTable: React.FC<LogKpiProps> = ({
       {/* 1. Material Balance Card (4 Transparent Segments) */}
       <div className={`border rounded-lg p-4 shadow-none transition-colors ${cardCls}`}>
         <div
-          className={`flex items-center justify-between pb-2 border-b text-xs font-semibold ${
+          className={`flex flex-wrap items-center justify-between gap-2 pb-2 border-b text-xs font-semibold ${
             isDark ? 'border-zinc-800' : 'border-slate-100'
           } ${textHead}`}
         >
           <div className="flex items-center gap-2">
-            <Layers className={`w-4 h-4 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`} />
+            <Layers className={`w-4 h-4 shrink-0 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`} />
             <span>Баланс сырья (100% объёма бревна)</span>
           </div>
           <span className={`font-mono text-xs tabular-nums ${textSub}`}>
@@ -272,7 +272,7 @@ export const LogBalanceAndTable: React.FC<LogKpiProps> = ({
         </div>
 
         {/* Spacious 4-Item Legend */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs pt-1">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap lg:grid lg:grid-cols-4 gap-2 lg:gap-3 text-xs pt-1">
           {/* Item 1: Nominal Lumber */}
           <div className="flex flex-col">
             <div className={`flex items-center gap-1.5 font-medium ${isDark ? 'text-zinc-200' : 'text-slate-800'}`}>
@@ -322,7 +322,7 @@ export const LogBalanceAndTable: React.FC<LogKpiProps> = ({
       {/* 2. Full-Width Sawn Boards Specification Table */}
       <div className={`border rounded-lg p-4 shadow-none transition-colors ${cardCls}`}>
         <div
-          className={`flex items-center justify-between pb-3 border-b text-xs font-semibold ${
+          className={`flex flex-wrap items-center justify-between gap-2 pb-3 border-b text-xs font-semibold ${
             isDark ? 'border-zinc-800 text-[#F4F4F5]' : 'border-slate-100 text-slate-800'
           }`}
         >
@@ -333,7 +333,7 @@ export const LogBalanceAndTable: React.FC<LogKpiProps> = ({
         </div>
 
         <div className="overflow-x-auto mt-2">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full min-w-[540px] text-left text-xs border-collapse">
             <thead>
               <tr
                 className={`border-b font-medium ${

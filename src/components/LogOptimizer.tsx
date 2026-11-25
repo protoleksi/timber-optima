@@ -79,10 +79,10 @@ export const LogOptimizer: React.FC<LogOptimizerProps> = ({ priceVersion }) => {
   const sliderTrackCls = isDark ? 'bg-zinc-700' : 'bg-slate-200';
 
   return (
-    <div className="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <div className="py-4 sm:py-6 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       {/* Title */}
-      <div className="mb-5">
-        <h1 className={`text-xl font-bold tracking-tight ${textHead}`}>
+      <div className="mb-4 sm:mb-5">
+        <h1 className={`text-lg sm:text-xl font-bold tracking-tight ${textHead}`}>
           Оптимизатор раскроя пиловочника
         </h1>
         <p className={`text-xs mt-0.5 ${textSub}`}>
@@ -92,8 +92,8 @@ export const LogOptimizer: React.FC<LogOptimizerProps> = ({ priceVersion }) => {
 
       {/* 2-Column Engineering Layout */}
       <div className="flex flex-col lg:flex-row gap-6 items-start">
-        {/* Left Sidebar: Fixed Width 320px */}
-        <aside className={`w-full lg:w-80 shrink-0 border rounded-lg p-4 shadow-none space-y-4 transition-colors ${cardCls}`}>
+        {/* Left Sidebar: Fixed Width 320px (below results on mobile, left on lg) */}
+        <aside className={`w-full lg:w-80 shrink-0 order-2 lg:order-1 border rounded-lg p-4 shadow-none space-y-4 transition-colors ${cardCls}`}>
           {/* 1. Target Objective & Rules */}
           <div className={`space-y-3 pb-3 border-b ${isDark ? 'border-zinc-800' : 'border-slate-100'}`}>
             <label className={`text-xs font-semibold block ${isDark ? 'text-zinc-200' : 'text-slate-800'}`}>
@@ -374,8 +374,8 @@ export const LogOptimizer: React.FC<LogOptimizerProps> = ({ priceVersion }) => {
           </div>
         </aside>
 
-        {/* Right Work Area: Flex 1 */}
-        <section className="flex-1 min-w-0 space-y-5">
+        {/* Right Work Area: Flex 1 (first on mobile for immediate blueprint/KPI view) */}
+        <section className="w-full flex-1 min-w-0 order-1 lg:order-2 space-y-5">
           {/* 1. Top Row: 4 Spacious KPI Cards */}
           <LogKpiCards
             currentResult={adaptiveResult}
@@ -385,12 +385,12 @@ export const LogOptimizer: React.FC<LogOptimizerProps> = ({ priceVersion }) => {
 
           {/* 2. Center: Blueprint Card with View Switcher in Card Header */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <span className={`text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-zinc-300' : 'text-slate-700'}`}>
                 Торцевой срез бревна
               </span>
               <div
-                className={`flex items-center gap-1 p-0.5 rounded border ${
+                className={`flex flex-wrap items-center gap-1 p-0.5 rounded border ${
                   isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-slate-100 border-slate-200'
                 }`}
               >

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Board, LogInput, SawingResult } from '../engine/types';
 import { getCrossSectionRadii } from '../engine/geometry';
 import { ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
@@ -20,6 +20,7 @@ export const LogBlueprint: React.FC<LogBlueprintProps> = ({
   badgeColor,
 }) => {
   const { isDark } = useTheme();
+  const canvasRef = useRef<HTMLDivElement>(null);
   const [hoveredBoard, setHoveredBoard] = useState<Board | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
   const [zoom, setZoom] = useState<number>(1);
@@ -128,8 +129,10 @@ export const LogBlueprint: React.FC<LogBlueprintProps> = ({
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent, board: Board) => {
-    const rect = e.currentTarget.getBoundingClientRect();
+  const updateTooltipPos = (e: React.MouseEvent, board: Board) => {
+    const rect =
+      canvasRef.current?.getBoundingClientRect() ??
+      e.currentTarget.getBoundingClientRect();
     setTooltipPos({
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
@@ -149,7 +152,7 @@ export const LogBlueprint: React.FC<LogBlueprintProps> = ({
     >
       {/* Blueprint Header */}
       <div
-        className={`flex items-center justify-between px-4 py-2.5 border-b transition-colors ${
+        className={`flex flex-wrap items-center justify-between gap-2 px-3 sm:px-4 py-2.5 border-b transition-colors ${
           isDark ? 'bg-[#18181B] border-[#27272A]' : 'bg-slate-50 border-slate-200'
         }`}
       >
@@ -224,14 +227,16 @@ export const LogBlueprint: React.FC<LogBlueprintProps> = ({
 
       {/* SVG Canvas Area */}
       <div
-        className={`relative w-full aspect-square max-h-[480px] flex items-center justify-center p-2 select-none overflow-hidden cursor-crosshair transition-colors ${
+        ref={canvasRef}
+        className={`relative w-full aspect-square max-h-[390px] sm:max-h-[480px] flex items-center justify-center p-1 sm:p-2 select-none overflow-hidden cursor-crosshair transition-colors ${
           isDark ? 'bg-[#111113]' : 'bg-white'
         }`}
+        onClick={() => setHoveredBoard(null)}
         onMouseLeave={() => setHoveredBoard(null)}
       >
         <svg
           viewBox={`${-halfSize * zoom} ${-halfSize * zoom} ${viewBoxSize * zoom} ${viewBoxSize * zoom}`}
-          className="w-full h-full max-h-[470px]"
+          className="w-full h-auto sm:h-full max-h-[380px] sm:max-h-none"
         >
           <defs>
             {/* Fine 10mm grid */}
@@ -406,8 +411,16 @@ export const LogBlueprint: React.FC<LogBlueprintProps> = ({
                 <g
                   key={b.id}
                   className="cursor-pointer"
-                  onMouseEnter={(e) => handleMouseMove(e, b)}
-                  onMouseMove={(e) => handleMouseMove(e, b)}
+                  onMouseEnter={(e) => updateTooltipPos(e, b)}
+                  onMouseMove={(e) => updateTooltipPos(e, b)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (hoveredBoard?.id === b.id) {
+                      setHoveredBoard(null);
+                    } else {
+                      updateTooltipPos(e, b);
+                    }
+                  }}
                 >
                   <rect
                     x={xLeft}
@@ -499,13 +512,19 @@ export const LogBlueprint: React.FC<LogBlueprintProps> = ({
         {/* Floating Tooltip in Clean Adaptive Style */}
         {hoveredBoard && tooltipPos && (
           <div
-            className={`absolute z-20 pointer-events-none rounded p-2.5 shadow-lg text-xs max-w-xs border transition-colors ${
+            className={`absolute z-20 pointer-events-none rounded p-2.5 shadow-lg text-xs max-w-[230px] sm:max-w-xs border transition-colors ${
               isDark
                 ? 'bg-[#18181B] border-[#27272A] text-[#F4F4F5]'
                 : 'bg-white border-slate-300 text-slate-900'
             }`}
             style={{
-              left: Math.min(tooltipPos.x + 12, 320),
+              left: Math.max(
+                8,
+                Math.min(
+                  tooltipPos.x + 12,
+                  Math.max(8, (canvasRef.current?.clientWidth ?? 340) - 225)
+                )
+              ),
               top: Math.max(tooltipPos.y - 75, 10),
             }}
           >

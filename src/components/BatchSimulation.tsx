@@ -55,9 +55,18 @@ export const BatchSimulation: React.FC = () => {
 
   // Factory annual capacity scaling (м3/год)
   const [annualRawVolume, setAnnualRawVolume] = useState<number>(100000);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
   const workerRef = useRef<Worker | null>(null);
   const timerStartRef = useRef<number>(0);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 639px)');
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
 
   // Run initial default simulation on mount (deterministic seed 42)
   useEffect(() => {
@@ -310,11 +319,11 @@ export const BatchSimulation: React.FC = () => {
     : 'bg-white border-slate-300 text-slate-900 focus:border-emerald-700';
 
   return (
-    <div className="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6">
+    <div className="py-4 sm:py-6 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b ${isDark ? 'border-zinc-800' : 'border-slate-200'}`}>
         <div>
-          <h1 className={`text-xl font-bold tracking-tight ${textHead}`}>
+          <h1 className={`text-lg sm:text-xl font-bold tracking-tight ${textHead}`}>
             Симуляция партии и апробация
           </h1>
           <p className={`text-xs mt-0.5 ${textSub}`}>
@@ -323,7 +332,7 @@ export const BatchSimulation: React.FC = () => {
         </div>
 
         {/* Action Buttons: Export */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={handleExportJson}
             disabled={!summary || isRunning}
@@ -495,7 +504,7 @@ export const BatchSimulation: React.FC = () => {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full min-w-[640px] text-left text-xs border-collapse">
               <thead>
                 <tr
                   className={`border-b font-medium ${
@@ -646,7 +655,7 @@ export const BatchSimulation: React.FC = () => {
           {showDecomposition && (
             <div className={`p-3.5 pt-0 border-t space-y-3 ${isDark ? 'border-zinc-800' : 'border-slate-100'}`}>
               <div className="overflow-x-auto mt-2">
-                <table className="w-full text-left text-xs border-collapse">
+                <table className="w-full min-w-[640px] text-left text-xs border-collapse">
                   <thead>
                     <tr
                       className={`border-b font-medium ${
@@ -741,10 +750,10 @@ export const BatchSimulation: React.FC = () => {
       {summary && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Chart 1: Recovery Rate by Diameter Group */}
-          <div className={`border rounded-lg p-4 shadow-none transition-colors ${cardCls}`}>
-            <div className={`flex items-center justify-between pb-3 border-b mb-4 ${isDark ? 'border-zinc-800' : 'border-slate-100'}`}>
+          <div className={`border rounded-lg p-3 sm:p-4 shadow-none transition-colors ${cardCls}`}>
+            <div className={`flex flex-wrap items-center justify-between gap-2 pb-3 border-b mb-4 ${isDark ? 'border-zinc-800' : 'border-slate-100'}`}>
               <div className="flex items-center gap-2">
-                <BarChart2 className={`w-4 h-4 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`} />
+                <BarChart2 className={`w-4 h-4 shrink-0 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`} />
                 <span className={`font-semibold text-xs ${isDark ? 'text-zinc-100' : 'text-slate-800'}`}>
                   Объёмный выход по группам диаметров (%)
                 </span>
@@ -756,14 +765,24 @@ export const BatchSimulation: React.FC = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={chartGroupData}
-                  margin={{ top: 10, right: 10, left: -15, bottom: 0 }}
+                  margin={
+                    isMobile
+                      ? { top: 10, right: 6, left: -18, bottom: 0 }
+                      : { top: 10, right: 10, left: -15, bottom: 0 }
+                  }
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#27272A' : '#E2E8F0'} />
                   <XAxis
                     dataKey="fullName"
                     stroke={isDark ? '#A1A1AA' : '#64748B'}
-                    fontSize={10.5}
+                    fontSize={isMobile ? 9.5 : 10.5}
                     tickLine={false}
+                    interval={0}
+                    tickFormatter={(val: string) => {
+                      if (!isMobile) return val;
+                      const m = val.match(/\(([^)]+)\)/);
+                      return m ? m[1].replace(' мм', '') : val.slice(0, 10);
+                    }}
                   />
                   <YAxis
                     stroke={isDark ? '#A1A1AA' : '#64748B'}
@@ -803,10 +822,10 @@ export const BatchSimulation: React.FC = () => {
           </div>
 
           {/* Chart 2: Revenue Structure */}
-          <div className={`border rounded-lg p-4 shadow-none transition-colors ${cardCls}`}>
-            <div className={`flex items-center justify-between pb-3 border-b mb-4 ${isDark ? 'border-zinc-800' : 'border-slate-100'}`}>
+          <div className={`border rounded-lg p-3 sm:p-4 shadow-none transition-colors ${cardCls}`}>
+            <div className={`flex flex-wrap items-center justify-between gap-2 pb-3 border-b mb-4 ${isDark ? 'border-zinc-800' : 'border-slate-100'}`}>
               <div className="flex items-center gap-2">
-                <TrendingUp className={`w-4 h-4 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`} />
+                <TrendingUp className={`w-4 h-4 shrink-0 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`} />
                 <span className={`font-semibold text-xs ${isDark ? 'text-zinc-100' : 'text-slate-800'}`}>
                   Структура совокупной выручки (₽)
                 </span>
@@ -818,14 +837,29 @@ export const BatchSimulation: React.FC = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={chartRevenueData}
-                  margin={{ top: 10, right: 10, left: 15, bottom: 0 }}
+                  margin={
+                    isMobile
+                      ? { top: 10, right: 6, left: -4, bottom: 0 }
+                      : { top: 10, right: 10, left: 15, bottom: 0 }
+                  }
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#27272A' : '#E2E8F0'} />
                   <XAxis
                     dataKey="name"
                     stroke={isDark ? '#A1A1AA' : '#64748B'}
-                    fontSize={11}
+                    fontSize={isMobile ? 9.5 : 11}
                     tickLine={false}
+                    interval={0}
+                    tickFormatter={(val: string) => {
+                      if (!isMobile) return val;
+                      const map: Record<string, string> = {
+                        '1. Baseline': '1. База',
+                        '2c. Ad. Geometry': '2c. Геом.',
+                        '3. Ad. Full (Vol)': '3. Объём',
+                        '4. Ad. Value': '4. Выр.',
+                      };
+                      return map[val] ?? val;
+                    }}
                   />
                   <YAxis
                     stroke={isDark ? '#A1A1AA' : '#64748B'}
@@ -879,10 +913,10 @@ export const BatchSimulation: React.FC = () => {
       )}
 
       {/* 5. Factory Scaling Calculator */}
-      <div className={`border rounded-lg p-5 shadow-none transition-colors ${cardCls}`}>
-        <div className={`flex items-center justify-between pb-3 border-b mb-4 ${isDark ? 'border-zinc-800' : 'border-slate-100'}`}>
+      <div className={`border rounded-lg p-4 sm:p-5 shadow-none transition-colors ${cardCls}`}>
+        <div className={`flex items-center justify-between gap-2 pb-3 border-b mb-4 ${isDark ? 'border-zinc-800' : 'border-slate-100'}`}>
           <div className="flex items-center gap-2">
-            <Building2 className={`w-4 h-4 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`} />
+            <Building2 className={`w-4 h-4 shrink-0 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`} />
             <div>
               <span className={`font-semibold text-xs block ${isDark ? 'text-zinc-100' : 'text-slate-800'}`}>
                 Калькулятор масштабирования на годовой объём лесопильного завода
@@ -892,12 +926,12 @@ export const BatchSimulation: React.FC = () => {
               </span>
             </div>
           </div>
-          <Calculator className="w-4 h-4 opacity-40" />
+          <Calculator className="w-4 h-4 opacity-40 shrink-0 hidden sm:block" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Capacity Input */}
-          <div className="lg:col-span-5 flex flex-col justify-between space-y-3">
+          <div className="lg:col-span-1 flex flex-col justify-between space-y-3">
             <div>
               <label className={`text-xs font-medium block mb-1 ${isDark ? 'text-zinc-300' : 'text-slate-700'}`}>
                 Годовой объём сырья на распиловку:
@@ -919,12 +953,12 @@ export const BatchSimulation: React.FC = () => {
             </div>
 
             {/* Quick capacity buttons */}
-            <div className="grid grid-cols-4 gap-1.5">
+            <div className="flex flex-wrap gap-1.5">
               {[50000, 100000, 150000, 250000].map((v) => (
                 <button
                   key={v}
                   onClick={() => setAnnualRawVolume(v)}
-                  className={`py-1 px-1.5 rounded text-[11px] font-semibold transition text-center tabular-nums ${
+                  className={`flex-1 min-w-[74px] py-1 px-1.5 rounded text-[11px] font-semibold transition text-center tabular-nums whitespace-nowrap ${
                     annualRawVolume === v
                       ? isDark
                         ? 'bg-emerald-600 text-white'
@@ -950,7 +984,7 @@ export const BatchSimulation: React.FC = () => {
           </div>
 
           {/* Scaled KPI Cards */}
-          <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Additional Lumber Volume */}
             <div className={`border rounded-lg p-3.5 flex flex-col justify-between transition-colors ${
               isDark ? 'bg-zinc-900/60 border-zinc-800' : 'bg-slate-50 border-slate-200'
@@ -959,7 +993,7 @@ export const BatchSimulation: React.FC = () => {
                 Дополнительный объём пиломатериалов (Стратегия 4):
               </span>
               <div className="my-2 flex items-baseline gap-2">
-                <span className={`text-2xl font-bold tabular-nums whitespace-nowrap ${isDark ? 'text-emerald-400' : 'text-emerald-800'}`}>
+                <span className={`text-xl sm:text-2xl font-bold tabular-nums whitespace-nowrap ${isDark ? 'text-emerald-400' : 'text-emerald-800'}`}>
                   +{annualExtraLumberVol.toLocaleString('ru-RU')}
                 </span>
                 <span className={`text-xs ${textSub}`}>м³/год</span>
@@ -981,7 +1015,7 @@ export const BatchSimulation: React.FC = () => {
                 Дополнительная выручка комбината (Стратегия 4):
               </span>
               <div className="my-2 flex items-baseline gap-2">
-                <span className={`text-2xl font-bold tabular-nums whitespace-nowrap ${isDark ? 'text-emerald-400' : 'text-emerald-800'}`}>
+                <span className={`text-xl sm:text-2xl font-bold tabular-nums whitespace-nowrap ${isDark ? 'text-emerald-400' : 'text-emerald-800'}`}>
                   +{annualExtraRevenueMln}
                 </span>
                 <span className={`text-xs ${textSub}`}>млн ₽/год</span>

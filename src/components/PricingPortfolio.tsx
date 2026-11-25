@@ -108,11 +108,11 @@ export const PricingPortfolio: React.FC<PricingPortfolioProps> = ({
     : 'bg-white border-slate-300 text-slate-900 focus:border-emerald-700';
 
   return (
-    <div className="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6">
+    <div className="py-4 sm:py-6 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6">
       {/* Toast Notification */}
       {saveToast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-lg shadow-lg flex items-center gap-2 text-xs font-medium">
-          <Check className="w-4 h-4 text-emerald-400" />
+        <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:bottom-6 sm:right-6 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-lg shadow-lg flex items-center gap-2 text-xs font-medium">
+          <Check className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{saveToast}</span>
         </div>
       )}
@@ -120,7 +120,7 @@ export const PricingPortfolio: React.FC<PricingPortfolioProps> = ({
       {/* Header */}
       <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b ${isDark ? 'border-zinc-800' : 'border-slate-200'}`}>
         <div>
-          <h1 className={`text-xl font-bold tracking-tight ${textHead}`}>
+          <h1 className={`text-lg sm:text-xl font-bold tracking-tight ${textHead}`}>
             Портфель заказов и рыночные цены
           </h1>
           <p className={`text-xs mt-0.5 ${textSub}`}>
@@ -265,9 +265,9 @@ export const PricingPortfolio: React.FC<PricingPortfolioProps> = ({
       </div>
 
       {/* Main Grid: Full-Width Table + Secondary Byproducts */}
-      <div className="flex flex-col lg:flex-row gap-6 items-start">
-        {/* Byproducts Sidebar Block (260px) */}
-        <div className={`w-full lg:w-64 shrink-0 border rounded-lg p-4 shadow-none space-y-4 transition-colors ${cardCls}`}>
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6 items-start">
+        {/* Byproducts Sidebar Block (280px on lg) */}
+        <div className={`w-full border rounded-lg p-4 shadow-none space-y-4 transition-colors ${cardCls}`}>
           <div className={`flex items-center gap-2 pb-2.5 border-b text-xs font-semibold ${isDark ? 'border-zinc-800 text-zinc-100' : 'border-slate-100 text-slate-800'}`}>
             <ShoppingBag className={`w-4 h-4 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`} />
             <span>Вторичная продукция</span>
@@ -317,8 +317,8 @@ export const PricingPortfolio: React.FC<PricingPortfolioProps> = ({
         </div>
 
         {/* Full-Width Specification Table */}
-        <div className={`flex-1 min-w-0 border rounded-lg overflow-hidden shadow-none transition-colors ${cardCls}`}>
-          <div className={`px-4 py-3 border-b flex items-center justify-between ${isDark ? 'bg-zinc-800/40 border-zinc-800' : 'bg-slate-50 border-slate-200'}`}>
+        <div className={`w-full min-w-0 border rounded-lg overflow-hidden shadow-none transition-colors ${cardCls}`}>
+          <div className={`px-4 py-3 border-b flex flex-wrap items-center justify-between gap-2 ${isDark ? 'bg-zinc-800/40 border-zinc-800' : 'bg-slate-50 border-slate-200'}`}>
             <div className="flex items-center gap-2">
               <Layers className={`w-4 h-4 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`} />
               <span className={`font-semibold text-xs ${isDark ? 'text-zinc-100' : 'text-slate-800'}`}>
