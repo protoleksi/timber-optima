@@ -32,9 +32,17 @@ import {
   Legend,
 } from 'recharts';
 import { useTheme } from '../context/ThemeContext';
+import { ActiveScenarioKey, getScenarioMeta } from '../utils/priceScenario';
 
-export const BatchSimulation: React.FC = () => {
+interface BatchSimulationProps {
+  activeScenario?: ActiveScenarioKey;
+}
+
+export const BatchSimulation: React.FC<BatchSimulationProps> = ({
+  activeScenario = 'standard',
+}) => {
   const { isDark } = useTheme();
+  const scenario = getScenarioMeta(activeScenario);
 
   const [logCount, setLogCount] = useState<number>(1000);
   const [meanDiameter, setMeanDiameter] = useState<number>(220);
@@ -167,6 +175,7 @@ export const BatchSimulation: React.FC = () => {
       {
         title: 'TimberOptima Batch Simulation Report',
         date: new Date().toISOString(),
+        scenario: scenario.fullLabel,
         config: {
           logCount,
           meanDiameter,
@@ -193,6 +202,7 @@ export const BatchSimulation: React.FC = () => {
     if (!summary) return;
     const deltaValPp = summary.adaptiveValue.averageRecoveryRate - summary.baseline.averageRecoveryRate;
     const rows = [
+      ['Ценовой сценарий', scenario.fullLabel],
       ['Параметр', 'Baseline', '2a. Exact D', '2b. D+Rot', '2c. Adaptive Geom', '3. Adaptive Full', '4. Adaptive Value'],
       [
         'Полезный объём (м³)',
@@ -292,14 +302,14 @@ export const BatchSimulation: React.FC = () => {
       ]
     : [];
 
-  // Scaling calculations
-  const sampleLogVol = summary ? summary.baseline.totalLogVolume : 228.64;
+  // Scaling calculations (strictly derived from current simulation summary)
+  const sampleLogVol = summary ? summary.baseline.totalLogVolume : 0;
   const sampleDeltaLumberVol = summary
     ? summary.adaptiveValue.totalNomLumberVolume - summary.baseline.totalNomLumberVolume
-    : 11.85;
+    : 0;
   const sampleDeltaRev = summary
     ? summary.adaptiveValue.totalRevenue - summary.baseline.totalRevenue
-    : 255822;
+    : 0;
 
   const scaleFactor = sampleLogVol > 0 ? annualRawVolume / sampleLogVol : 0;
   const annualExtraLumberVol = Math.round(sampleDeltaLumberVol * scaleFactor);
@@ -307,7 +317,14 @@ export const BatchSimulation: React.FC = () => {
 
   const deltaValPp = summary
     ? summary.adaptiveValue.averageRecoveryRate - summary.baseline.averageRecoveryRate
-    : 5.18;
+    : 0;
+
+  const delta2bVs2aPp = summary
+    ? summary.stepRotation.averageRecoveryRate - summary.stepDiameter.averageRecoveryRate
+    : 0;
+
+  const formatSigned = (val: number, decimals = 2, suffix = '') =>
+    `${val >= 0 ? '+' : ''}${val.toFixed(decimals)}${suffix}`;
 
   const cardCls = isDark
     ? 'bg-[#18181B] border-[#27272A]'
@@ -491,10 +508,24 @@ export const BatchSimulation: React.FC = () => {
       {summary && (
         <div className={`border rounded-lg overflow-hidden shadow-none transition-colors ${cardCls}`}>
           <div className={`px-4 py-3 border-b flex flex-wrap items-center justify-between gap-3 text-xs ${isDark ? 'bg-zinc-800/40 border-zinc-800' : 'bg-slate-50 border-slate-200'}`}>
-            <div className={`flex items-center gap-2 font-semibold ${isDark ? 'text-zinc-100' : 'text-slate-800'}`}>
-              <CheckCircle2 className={`w-4 h-4 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`} />
+            <div className={`flex flex-wrap items-center gap-2 font-semibold ${isDark ? 'text-zinc-100' : 'text-slate-800'}`}>
+              <CheckCircle2 className={`w-4 h-4 shrink-0 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`} />
               <span>
                 Сравнение стратегий раскроя ({summary.totalLogs} брёвен, суммарный объём {summary.baseline.totalLogVolume.toFixed(2)} м³)
+              </span>
+              <span
+                className={`px-2 py-0.5 rounded text-[11px] font-medium border ${
+                  scenario.isHypothetical
+                    ? isDark
+                      ? 'bg-amber-950/50 text-amber-300 border-amber-800/80'
+                      : 'bg-amber-50 text-amber-800 border-amber-200'
+                    : isDark
+                    ? 'bg-emerald-950/50 text-emerald-300 border-emerald-800/80'
+                    : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                }`}
+              >
+                Сценарий: {scenario.shortTitle}
+                {scenario.isHypothetical ? ` (${scenario.note})` : ''}
               </span>
             </div>
             <div className={`flex items-center gap-1.5 tabular-nums ${textSub}`}>
@@ -713,7 +744,7 @@ export const BatchSimulation: React.FC = () => {
                         {(((summary.stepRotation.totalRevenue - summary.baseline.totalRevenue) / summary.baseline.totalRevenue) * 100).toFixed(2)}%
                       </td>
                       <td className={`py-2 px-3 ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
-                        Вероятная причина: поворот бревна частично снижает отбраковку (+2.0 п.п. к шагу 2a), однако жёсткая круговая геометрия пакета не способна задействовать вытянутость эллипса.
+                        Вероятная причина: поворот бревна частично снижает отбраковку ({formatSigned(delta2bVs2aPp, 2, ' п.п.')} к шагу 2a), однако жёсткая круговая геометрия пакета не способна задействовать вытянутость эллипса.
                       </td>
                     </tr>
 
@@ -726,16 +757,16 @@ export const BatchSimulation: React.FC = () => {
                         {summary.adaptiveGeometry.averageRecoveryRate.toFixed(2)}%
                       </td>
                       <td className={`py-2 px-3 text-right font-bold whitespace-nowrap ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
-                        +{summary.deltaGeometryPercent.toFixed(2)} п.п.
+                        {formatSigned(summary.deltaGeometryPercent, 2, ' п.п.')}
                       </td>
                       <td className={`py-2 px-3 text-right whitespace-nowrap ${isDark ? 'text-zinc-200' : 'text-slate-800'}`}>
                         {Math.round(summary.adaptiveGeometry.totalRevenue).toLocaleString('ru-RU')} ₽
                       </td>
                       <td className={`py-2 px-3 text-right whitespace-nowrap ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
-                        +{(((summary.adaptiveGeometry.totalRevenue - summary.baseline.totalRevenue) / summary.baseline.totalRevenue) * 100).toFixed(2)}%
+                        {formatSigned(((summary.adaptiveGeometry.totalRevenue - summary.baseline.totalRevenue) / summary.baseline.totalRevenue) * 100, 2, '%')}
                       </td>
                       <td className={`py-2 px-3 font-medium ${isDark ? 'text-zinc-200' : 'text-slate-800'}`}>
-                        Вероятная причина: индивидуальный подбор толщины бруса и ширин боковых досок под обе полуоси эллипса (rx, ry) позволяет полностью задействовать дополнительную площадь сечения (+6.5 п.п. к базе).
+                        Вероятная причина: индивидуальный подбор толщины бруса и ширин боковых досок под обе полуоси эллипса (rx, ry) позволяет полностью задействовать дополнительную площадь сечения ({formatSigned(summary.deltaGeometryPercent, 2, ' п.п.')} к базе).
                       </td>
                     </tr>
                   </tbody>
@@ -913,6 +944,7 @@ export const BatchSimulation: React.FC = () => {
       )}
 
       {/* 5. Factory Scaling Calculator */}
+      {summary && (
       <div className={`border rounded-lg p-4 sm:p-5 shadow-none transition-colors ${cardCls}`}>
         <div className={`flex items-center justify-between gap-2 pb-3 border-b mb-4 ${isDark ? 'border-zinc-800' : 'border-slate-100'}`}>
           <div className="flex items-center gap-2">
@@ -1023,13 +1055,14 @@ export const BatchSimulation: React.FC = () => {
               <span className={`text-[11px] ${textSub}`}>
                 Прирост совокупной выручки на{' '}
                 <strong className={`whitespace-nowrap ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                  +{summary?.deltaValuePercent.toFixed(1) ?? '12.3'}%
+                  {formatSigned(summary.deltaValuePercent, 1, '%')}
                 </strong>
               </span>
             </div>
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 };

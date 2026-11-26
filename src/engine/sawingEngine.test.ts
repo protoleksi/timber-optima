@@ -853,4 +853,87 @@ describe('TimberOptima Sawing Engine Unit Tests', () => {
 
     resetGostSections();
   });
+
+  it('11. Golden benchmark: Пресет 1, 1 000 брёвен, seed = 42 по 6 стратегиям', () => {
+    resetGostSections();
+    const config: OptimizationConfig = {
+      kerf: 3.6,
+      useShrinkage: true,
+      useTaperBoards: true,
+      rotationStepDeg: 15,
+      sections: GOST_24454_SECTIONS.map((s) => ({ ...s })),
+    };
+
+    const logs = generateBatch(1000, 42, config.kerf, true, true);
+    const summary = runBatchSimulation(logs, config, 42);
+
+    const benchmarks = [
+      {
+        name: '1. Baseline',
+        stats: summary.baseline,
+        expVol: 108.38,
+        expYield: 47.40,
+        expRev: 2081133,
+      },
+      {
+        name: '2a. Exact Diameter',
+        stats: summary.stepDiameter,
+        expVol: 94.26,
+        expYield: 41.23,
+        expRev: 1858347,
+      },
+      {
+        name: '2b. Exact D + Rotation',
+        stats: summary.stepRotation,
+        expVol: 101.97,
+        expYield: 44.60,
+        expRev: 1976878,
+      },
+      {
+        name: '2c. Adaptive Geometry',
+        stats: summary.adaptiveGeometry,
+        expVol: 120.04,
+        expYield: 52.50,
+        expRev: 2257197,
+      },
+      {
+        name: '3. Adaptive Full',
+        stats: summary.adaptiveVolume,
+        expVol: 121.75,
+        expYield: 53.25,
+        expRev: 2281639,
+      },
+      {
+        name: '4. Adaptive Value',
+        stats: summary.adaptiveValue,
+        expVol: 121.70,
+        expYield: 53.23,
+        expRev: 2282533,
+      },
+    ];
+
+    console.log('\n========================================================================================================');
+    console.log(`🌲 GOLDEN BENCHMARK (ПРЕСЕТ 1, 1 000 БРЁВЕН, SEED = 42, Vсырья = ${summary.baseline.totalLogVolume.toFixed(4)} м³)`);
+    console.log('========================================================================================================');
+    console.table(
+      benchmarks.map((b) => ({
+        'Стратегия': b.name,
+        'Ожид. объём (м³)': b.expVol.toFixed(2),
+        'Получ. объём (м³)': b.stats.totalNomLumberVolume.toFixed(4),
+        'Ожид. выход (%)': b.expYield.toFixed(2),
+        'Получ. выход (%)': b.stats.averageRecoveryRate.toFixed(4),
+        'Ожид. выручка (₽)': b.expRev,
+        'Получ. выручка (₽)': Math.round(b.stats.totalRevenue),
+      }))
+    );
+    console.log('========================================================================================================\n');
+
+    expect(Math.abs(summary.baseline.totalLogVolume - 228.64)).toBeLessThanOrEqual(0.005);
+
+    for (const b of benchmarks) {
+      expect(Math.abs(b.stats.totalNomLumberVolume - b.expVol)).toBeLessThanOrEqual(0.005);
+      expect(Math.abs(b.stats.averageRecoveryRate - b.expYield)).toBeLessThanOrEqual(0.005);
+      expect(Math.abs(b.stats.totalRevenue - b.expRev)).toBeLessThanOrEqual(1.0);
+    }
+  }, 15000);
 });

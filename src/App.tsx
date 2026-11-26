@@ -1,15 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header, TabKey } from './components/Header';
 import { LogOptimizer } from './components/LogOptimizer';
 import { PricingPortfolio } from './components/PricingPortfolio';
 import { BatchSimulation } from './components/BatchSimulation';
 import { TreePine } from 'lucide-react';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { resetGostSections } from './engine/gostData';
+import { ActiveScenarioKey } from './utils/priceScenario';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState<TabKey>('optimizer');
   const [priceVersion, setPriceVersion] = useState<number>(0);
+  const [activeScenario, setActiveScenario] = useState<ActiveScenarioKey>('standard');
   const { isDark } = useTheme();
+
+  useEffect(() => {
+    resetGostSections();
+    setActiveScenario('standard');
+    setPriceVersion((v) => v + 1);
+  }, []);
 
   const handlePricesUpdated = () => {
     setPriceVersion((v) => v + 1);
@@ -27,14 +36,23 @@ function AppContent() {
       {/* Main Tab Content */}
       <main className="flex-1">
         {activeTab === 'optimizer' && (
-          <LogOptimizer priceVersion={priceVersion} />
+          <LogOptimizer
+            priceVersion={priceVersion}
+            activeScenario={activeScenario}
+          />
         )}
 
         {activeTab === 'portfolio' && (
-          <PricingPortfolio onPricesUpdated={handlePricesUpdated} />
+          <PricingPortfolio
+            activeScenario={activeScenario}
+            onScenarioChange={setActiveScenario}
+            onPricesUpdated={handlePricesUpdated}
+          />
         )}
 
-        {activeTab === 'batch' && <BatchSimulation />}
+        {activeTab === 'batch' && (
+          <BatchSimulation activeScenario={activeScenario} />
+        )}
       </main>
 
       {/* Engineering Footer */}

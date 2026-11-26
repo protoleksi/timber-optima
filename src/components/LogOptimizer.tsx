@@ -6,12 +6,17 @@ import { LogBlueprint } from './LogBlueprint';
 import { LogKpiCards, LogBalanceAndTable } from './LogKpiPanel';
 import { Sliders, Maximize2, Columns } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { ActiveScenarioKey } from '../utils/priceScenario';
 
 interface LogOptimizerProps {
   priceVersion: number;
+  activeScenario: ActiveScenarioKey;
 }
 
-export const LogOptimizer: React.FC<LogOptimizerProps> = ({ priceVersion }) => {
+export const LogOptimizer: React.FC<LogOptimizerProps> = ({
+  priceVersion,
+  activeScenario,
+}) => {
   const { isDark } = useTheme();
 
   // Log parameters state
@@ -472,6 +477,7 @@ export const LogOptimizer: React.FC<LogOptimizerProps> = ({ priceVersion }) => {
             currentResult={adaptiveResult}
             baselineResult={baselineResult}
             useShrinkage={useShrinkage}
+            activeScenario={activeScenario}
           />
         </section>
       </div>

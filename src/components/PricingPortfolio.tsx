@@ -12,19 +12,23 @@ import {
 import { BoardSection } from '../engine/types';
 import { RotateCcw, ShoppingBag, Layers, Check } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { ActiveScenarioKey } from '../utils/priceScenario';
 
 interface PricingPortfolioProps {
+  activeScenario: ActiveScenarioKey;
+  onScenarioChange: (scenario: ActiveScenarioKey) => void;
   onPricesUpdated: () => void;
 }
 
 export const PricingPortfolio: React.FC<PricingPortfolioProps> = ({
+  activeScenario,
+  onScenarioChange,
   onPricesUpdated,
 }) => {
   const { isDark } = useTheme();
   const [sections, setSections] = useState<BoardSection[]>([...GOST_24454_SECTIONS]);
   const [chipsPrice, setChipsPrice] = useState<number>(BYPRODUCT_PRICES.chipsPricePerM3);
   const [sawdustPrice, setSawdustPrice] = useState<number>(BYPRODUCT_PRICES.sawdustPricePerM3);
-  const [activePreset, setActivePreset] = useState<PricePresetKey>('standard');
   const [saveToast, setSaveToast] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -35,12 +39,14 @@ export const PricingPortfolio: React.FC<PricingPortfolioProps> = ({
   const handlePriceChange = (thickness: number, width: number, newPrice: number) => {
     updateGostSection(thickness, width, { pricePerM3: newPrice });
     setSections([...GOST_24454_SECTIONS]);
+    onScenarioChange('custom');
     onPricesUpdated();
   };
 
   const handleActiveToggle = (thickness: number, width: number, active: boolean) => {
     updateGostSection(thickness, width, { active });
     setSections([...GOST_24454_SECTIONS]);
+    onScenarioChange('custom');
     onPricesUpdated();
   };
 
@@ -63,18 +69,20 @@ export const PricingPortfolio: React.FC<PricingPortfolioProps> = ({
   const handleChipsChange = (price: number) => {
     setChipsPrice(price);
     updateByproductPrice('chips', price);
+    onScenarioChange('custom');
     onPricesUpdated();
   };
 
   const handleSawdustChange = (price: number) => {
     setSawdustPrice(price);
     updateByproductPrice('sawdust', price);
+    onScenarioChange('custom');
     onPricesUpdated();
   };
 
   const handleApplyPreset = (preset: PricePresetKey) => {
     applyPricePreset(preset);
-    setActivePreset(preset);
+    onScenarioChange(preset);
     setSections([...GOST_24454_SECTIONS]);
     setChipsPrice(BYPRODUCT_PRICES.chipsPricePerM3);
     setSawdustPrice(BYPRODUCT_PRICES.sawdustPricePerM3);
@@ -90,12 +98,12 @@ export const PricingPortfolio: React.FC<PricingPortfolioProps> = ({
 
   const handleReset = () => {
     resetGostSections();
-    setActivePreset('standard');
+    onScenarioChange('standard');
     setSections([...GOST_24454_SECTIONS]);
-    setChipsPrice(1800);
-    setSawdustPrice(450);
+    setChipsPrice(BYPRODUCT_PRICES.chipsPricePerM3);
+    setSawdustPrice(BYPRODUCT_PRICES.sawdustPricePerM3);
     onPricesUpdated();
-    showToast('Цены сброшены к базовым значениям по ГОСТ.');
+    showToast('Цены сброшены к базовым значениям (Пресет 1).');
   };
 
   const cardCls = isDark
@@ -152,7 +160,7 @@ export const PricingPortfolio: React.FC<PricingPortfolioProps> = ({
           <button
             onClick={() => handleApplyPreset('standard')}
             className={`p-3.5 rounded-lg border text-left transition flex flex-col justify-between ${
-              activePreset === 'standard'
+              activeScenario === 'standard'
                 ? isDark
                   ? 'bg-emerald-950/40 border-emerald-500 ring-1 ring-emerald-500'
                   : 'bg-emerald-50/50 border-emerald-600 ring-1 ring-emerald-600'
@@ -167,7 +175,7 @@ export const PricingPortfolio: React.FC<PricingPortfolioProps> = ({
               </span>
               <span
                 className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
-                  activePreset === 'standard'
+                  activeScenario === 'standard'
                     ? isDark
                       ? 'border-emerald-500 bg-emerald-500'
                       : 'border-emerald-700 bg-emerald-700'
@@ -176,7 +184,7 @@ export const PricingPortfolio: React.FC<PricingPortfolioProps> = ({
                     : 'border-slate-400 bg-white'
                 }`}
               >
-                {activePreset === 'standard' && (
+                {activeScenario === 'standard' && (
                   <span className="w-1.5 h-1.5 rounded-full bg-white" />
                 )}
               </span>
@@ -190,7 +198,7 @@ export const PricingPortfolio: React.FC<PricingPortfolioProps> = ({
           <button
             onClick={() => handleApplyPreset('dryScenario')}
             className={`p-3.5 rounded-lg border text-left transition flex flex-col justify-between ${
-              activePreset === 'dryScenario'
+              activeScenario === 'dryScenario'
                 ? isDark
                   ? 'bg-emerald-950/40 border-emerald-500 ring-1 ring-emerald-500'
                   : 'bg-emerald-50/50 border-emerald-600 ring-1 ring-emerald-600'
@@ -205,7 +213,7 @@ export const PricingPortfolio: React.FC<PricingPortfolioProps> = ({
               </span>
               <span
                 className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
-                  activePreset === 'dryScenario'
+                  activeScenario === 'dryScenario'
                     ? isDark
                       ? 'border-emerald-500 bg-emerald-500'
                       : 'border-emerald-700 bg-emerald-700'
@@ -214,7 +222,7 @@ export const PricingPortfolio: React.FC<PricingPortfolioProps> = ({
                     : 'border-slate-400 bg-white'
                 }`}
               >
-                {activePreset === 'dryScenario' && (
+                {activeScenario === 'dryScenario' && (
                   <span className="w-1.5 h-1.5 rounded-full bg-white" />
                 )}
               </span>
@@ -228,7 +236,7 @@ export const PricingPortfolio: React.FC<PricingPortfolioProps> = ({
           <button
             onClick={() => handleApplyPreset('premiumScenario')}
             className={`p-3.5 rounded-lg border text-left transition flex flex-col justify-between ${
-              activePreset === 'premiumScenario'
+              activeScenario === 'premiumScenario'
                 ? isDark
                   ? 'bg-emerald-950/40 border-emerald-500 ring-1 ring-emerald-500'
                   : 'bg-emerald-50/50 border-emerald-600 ring-1 ring-emerald-600'
@@ -243,7 +251,7 @@ export const PricingPortfolio: React.FC<PricingPortfolioProps> = ({
               </span>
               <span
                 className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
-                  activePreset === 'premiumScenario'
+                  activeScenario === 'premiumScenario'
                     ? isDark
                       ? 'border-emerald-500 bg-emerald-500'
                       : 'border-emerald-700 bg-emerald-700'
@@ -252,7 +260,7 @@ export const PricingPortfolio: React.FC<PricingPortfolioProps> = ({
                     : 'border-slate-400 bg-white'
                 }`}
               >
-                {activePreset === 'premiumScenario' && (
+                {activeScenario === 'premiumScenario' && (
                   <span className="w-1.5 h-1.5 rounded-full bg-white" />
                 )}
               </span>

@@ -2,11 +2,13 @@ import React from 'react';
 import { SawingResult } from '../engine/types';
 import { Percent, Banknote, TrendingUp, CircleDot, Info, Layers } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { ActiveScenarioKey, getScenarioMeta } from '../utils/priceScenario';
 
 interface LogKpiProps {
   currentResult: SawingResult;
   baselineResult: SawingResult;
   useShrinkage: boolean;
+  activeScenario?: ActiveScenarioKey;
 }
 
 export const LogKpiCards: React.FC<LogKpiProps> = ({
@@ -123,7 +125,7 @@ export const LogKpiCards: React.FC<LogKpiProps> = ({
               isDark ? 'text-emerald-400' : 'text-emerald-700'
             }`}
           >
-            +{deltaYieldPp.toFixed(1)} п.п.
+            {deltaYieldPp >= 0 ? `+${deltaYieldPp.toFixed(1)}` : deltaYieldPp.toFixed(1)} п.п.
           </span>
         </div>
       </div>
@@ -153,8 +155,10 @@ export const LogKpiCards: React.FC<LogKpiProps> = ({
 export const LogBalanceAndTable: React.FC<LogKpiProps> = ({
   currentResult,
   useShrinkage,
+  activeScenario = 'standard',
 }) => {
   const { isDark } = useTheme();
+  const scenario = getScenarioMeta(activeScenario);
   const bal = currentResult.balance;
 
   const nomPct = (bal.nomBoardsVolume / bal.logVolume) * 100;
@@ -326,7 +330,23 @@ export const LogBalanceAndTable: React.FC<LogKpiProps> = ({
             isDark ? 'border-zinc-800 text-[#F4F4F5]' : 'border-slate-100 text-slate-800'
           }`}
         >
-          <span>Спецификация выпиленных досок ({currentResult.boards.length} шт.)</span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span>Спецификация выпиленных досок ({currentResult.boards.length} шт.)</span>
+            <span
+              className={`px-2 py-0.5 rounded text-[11px] font-medium border ${
+                scenario.isHypothetical
+                  ? isDark
+                    ? 'bg-amber-950/50 text-amber-300 border-amber-800/80'
+                    : 'bg-amber-50 text-amber-800 border-amber-200'
+                  : isDark
+                  ? 'bg-emerald-950/50 text-emerald-300 border-emerald-800/80'
+                  : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              }`}
+            >
+              Сценарий: {scenario.shortTitle}
+              {scenario.isHypothetical ? ` (${scenario.note})` : ''}
+            </span>
+          </div>
           <span className={`font-mono text-xs tabular-nums whitespace-nowrap ${textSub}`}>
             Итого объём: {bal.nomBoardsVolume.toFixed(3)} м³
           </span>
